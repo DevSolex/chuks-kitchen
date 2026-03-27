@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Menu — Chuks Kitchen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+  <div id="navbar-mount"></div>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <h1 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em">Our Menu</h1>
+      <p style="color:var(--muted);margin-top:0.25rem">Fresh meals prepared daily, just for you</p>
+      <div class="category-tabs" id="category-tabs" style="margin-top:1.25rem">
+        <button class="cat-tab active" data-cat="">All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div style="background:#fff;border-bottom:1px solid var(--border);padding:0.75rem 1.5rem">
+    <div style="max-width:1200px;margin:0 auto">
+      <input class="form-input" id="search-input" placeholder="🔍  Search meals..." style="max-width:360px"/>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="food-grid" id="food-grid">
+      <!-- skeleton -->
+      ${Array(6).fill('<div class="card food-card"><div class="food-card-img skeleton" style="height:180px"></div><div class="food-card-body"><div class="skeleton" style="height:1rem;width:70%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:0.75rem;width:90%"></div><div class="skeleton" style="height:0.75rem;width:60%;margin-top:0.3rem"></div></div></div>').join('')}
+    </div>
+    <div class="empty-state hidden" id="empty-state">
+      <div class="empty-state-icon">🍽️</div>
+      <div class="empty-state-title">No items found</div>
+      <div class="empty-state-desc">Try a different category or search term</div>
+    </div>
+  </div>
+
+  <!-- Cart Drawer -->
+  <div class="drawer-overlay" id="drawer-overlay"></div>
+  <div class="drawer" id="cart-drawer">
+    <div class="drawer-header">
+      <h2 style="font-weight:800;font-size:1.1rem">🛒 Your Cart</h2>
+      <button class="btn btn-ghost btn-icon" id="close-drawer" style="font-size:1.2rem">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body">
+      <div class="empty-state" id="cart-empty" style="padding:3rem 1rem">
+        <div class="empty-state-icon">🛒</div>
+        <div class="empty-state-title">Cart is empty</div>
+        <div class="empty-state-desc">Add items from the menu</div>
+      </div>
+    </div>
+    <div class="drawer-footer" id="drawer-footer" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <span style="font-weight:600;color:var(--muted)">Total</span>
+        <span style="font-size:1.4rem;font-weight:900;color:var(--brand)" id="drawer-total">₦0</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:0.85rem;font-size:1rem" id="checkout-btn">Place Order</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiFetch, showToast, setLoading, formatPrice, isLoggedIn, injectNavbar, refreshCartBadge } from '/js/api.js';
+    if (!isLoggedIn()) location.href = '/pages/login.html';
+    injectNavbar('menu');
+
+    let allItems = [], cartItems = [], activeCategory = '', searchTerm = '';
+
+    // Open cart drawer on nav cart button
+    document.addEventListener('click', e => {
+      if (e.target.closest('#cart-nav-btn')) openDrawer();
+    });
+
+    // Category tabs
+    async function loadCategories() {
+      try {
+        const cats = await apiFetch('/food/categories');
+        const tabs = document.getElementById('category-tabs');
+        cats.forEach(c => {
+          const btn = document.createElement('button');
+          btn.className = 'cat-tab'; btn.dataset.cat = c; btn.textContent = c;
+          tabs.appendChild(btn);
+        });
+        tabs.addEventListener('click', e => {
+          const btn = e.target.closest('.cat-tab');
+          if (!btn) return;
+          tabs.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+          btn.classList.add('active');
+          activeCategory = btn.dataset.cat;
+          renderItems();
+        });
+      } catch {}
+    }
+
+    async function loadMenu() {
+      try {
+        allItems = await apiFetch('/food/');
+        renderItems();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+
+    function renderItems() {
+      const grid = document.getElementById('food-grid');
+      const empty = document.getElementById('empty-state');
+      let items = allItems;
+      if (activeCategory) items = items.filter(i => i.category === activeCategory);
+      if (searchTerm) items = items.filter(i => i.name.toLowerCase().includes(searchTerm) || (i.description||'').toLowerCase().includes(searchTerm));
+
+      if (!items.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+
+      grid.innerHTML = items.map(item => `
+        <div class="card food-card">
+          <div class="food-card-img">
+            ${item.image_url ? `<img src="${item.image_url}" alt="${item.name}" loading="lazy"/>` : '🍽️'}
+            <div style="position:absolute;top:0.6rem;left:0.6rem">
+              <span class="badge badge-orange">${item.category}</span>
+            </div>
+          </div>
+          <div class="food-card-body">
+            <div class="food-card-name">${item.name}</div>
+            <div class="food-card-desc">${item.description || 'A delicious meal prepared fresh daily.'}</div>
+            <div class="food-card-footer">
+              <span class="food-card-price">${formatPrice(item.price)}</span>
+              <button class="btn btn-primary btn-sm add-btn" data-id="${item.id}" data-name="${item.name}">+ Add</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.add-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          setLoading(btn, true);
+          try {
+            await apiFetch('/cart/', { method: 'POST', body: JSON.stringify({ food_item_id: +btn.dataset.id, quantity: 1 }) });
+            showToast(`${btn.dataset.name} added to cart 🛒`);
+            await loadCart();
+          } catch (err) { showToast(err.message, 'error'); }
+          finally { setLoading(btn, false); }
+        });
+      });
+    }
+
+    document.getElementById('search-input').addEventListener('input', e => {
+      searchTerm = e.target.value.toLowerCase().trim();
+      renderItems();
+    });
+
+    // Cart drawer
+    async function loadCart() {
+      cartItems = await apiFetch('/cart/');
+      renderCart();
+      refreshCartBadge();
+    }
+
+    function renderCart() {
+      const body = document.getElementById('drawer-body');
+      const footer = document.getElementById('drawer-footer');
+      const empty = document.getElementById('cart-empty');
+
+      if (!cartItems.length) {
+        body.innerHTML = ''; body.appendChild(empty); empty.style.display = '';
+        footer.style.display = 'none'; return;
+      }
+      empty.style.display = 'none';
+      footer.style.display = '';
+
+      let total = 0;
+      body.innerHTML = cartItems.map(ci => {
+        const sub = ci.food_item.price * ci.quantity; total += sub;
+        return `
+          <div class="cart-item">
+            <div class="cart-item-img">
+              ${ci.food_item.image_url ? `<img src="${ci.food_item.image_url}" alt="${ci.food_item.name}"/>` : '🍽️'}
+            </div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${ci.food_item.name}</div>
+              <div class="cart-item-price">${formatPrice(ci.food_item.price)} each</div>
+            </div>
+            <div class="qty-control">
+              <button class="qty-btn" data-id="${ci.id}" data-action="dec">−</button>
+              <span class="qty-val">${ci.quantity}</span>
+              <button class="qty-btn" data-id="${ci.id}" data-action="inc" data-food="${ci.food_item.id}">+</button>
+            </div>
+            <div style="font-weight:700;font-size:0.875rem;min-width:60px;text-align:right">${formatPrice(sub)}</div>
+          </div>`;
+      }).join('');
+
+      document.getElementById('drawer-total').textContent = formatPrice(total);
+
+      body.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = +btn.dataset.id;
+          const action = btn.dataset.action;
+          const item = cartItems.find(c => c.id === id);
+          if (!item) return;
+          try {
+            if (action === 'dec' && item.quantity <= 1) {
+              await apiFetch(`/cart/${id}`, { method: 'DELETE' });
+            } else {
+              const newQty = action === 'inc' ? item.quantity + 1 : item.quantity - 1;
+              await apiFetch('/cart/', { method: 'POST', body: JSON.stringify({ food_item_id: item.food_item.id, quantity: action === 'inc' ? 1 : -1 }) });
+            }
+            await loadCart();
+          } catch (err) { showToast(err.message, 'error'); }
+        });
+      });
+    }
+
+    function openDrawer() {
+      document.getElementById('cart-drawer').classList.add('open');
+      document.getElementById('drawer-overlay').classList.add('open');
+      loadCart();
+    }
+    function closeDrawer() {
+      document.getElementById('cart-drawer').classList.remove('open');
+      document.getElementById('drawer-overlay').classList.remove('open');
+    }
+    document.getElementById('close-drawer').addEventListener('click', closeDrawer);
+    document.getElementById('drawer-overlay').addEventListener('click', closeDrawer);
+
+    document.getElementById('checkout-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('checkout-btn');
+      setLoading(btn, true);
+      try {
+        await apiFetch('/orders/', { method: 'POST' });
+        showToast('Order placed successfully! 🎉');
+        closeDrawer();
+        setTimeout(() => location.href = '/pages/orders.html', 1200);
+      } catch (err) { showToast(err.message, 'error'); }
+      finally { setLoading(btn, false); }
+    });
+
+    loadCategories();
+    loadMenu();
+    loadCart();
+  </script>
+</body>
+</html>

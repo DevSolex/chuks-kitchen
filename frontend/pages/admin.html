@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Chuks Kitchen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    .admin-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 64px); }
+    .sidebar { background: #111827; color: #d1d5db; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .sidebar-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: #6b7280; text-transform: uppercase; padding: 0.5rem 0.75rem; margin-top: 0.5rem; }
+    .sidebar-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.15s; color: #d1d5db; text-decoration: none; border: none; background: none; width: 100%; text-align: left; }
+    .sidebar-link:hover, .sidebar-link.active { background: rgba(255,255,255,0.08); color: #fff; }
+    .sidebar-link.active { background: var(--brand); color: #fff; }
+    .admin-content { padding: 2rem; background: var(--bg); overflow-y: auto; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-box { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+    .stat-box-num { font-size: 1.75rem; font-weight: 900; color: var(--brand); }
+    .stat-box-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+    .img-preview { width: 80px; height: 80px; border-radius: 0.5rem; object-fit: cover; border: 1px solid var(--border); }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th { text-align: left; font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 0.75rem 1rem; border-bottom: 2px solid var(--border); background: #f9fafb; }
+    .table td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: middle; }
+    .table tr:hover td { background: #fafafa; }
+    .section-panel { display: none; }
+    .section-panel.active { display: block; }
+    @media(max-width:768px){ .admin-layout{grid-template-columns:1fr} .sidebar{display:none} }
+  </style>
+</head>
+<body>
+  <div id="navbar-mount"></div>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div style="padding:0.5rem 0.75rem;margin-bottom:0.5rem">
+        <div style="font-weight:800;color:#fff;font-size:1rem">⚙️ Admin Panel</div>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:0.1rem" id="admin-email"></div>
+      </div>
+      <div class="sidebar-title">Manage</div>
+      <button class="sidebar-link active" data-section="food">🍽️ Food Items</button>
+      <button class="sidebar-link" data-section="orders">📦 Orders</button>
+      <button class="sidebar-link" data-section="users">👥 Users</button>
+      <div style="flex:1"></div>
+      <a href="/pages/menu.html" class="sidebar-link">← Back to Site</a>
+    </aside>
+
+    <!-- Main content -->
+    <main class="admin-content">
+
+      <!-- Food Items -->
+      <div class="section-panel active" id="section-food">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+          <div>
+            <h1 style="font-size:1.4rem;font-weight:800">Food Items</h1>
+            <p style="color:var(--muted);font-size:0.875rem">Add, edit or remove menu items</p>
+          </div>
+          <button class="btn btn-primary" id="open-add-modal">+ Add Food Item</button>
+        </div>
+        <div class="card" style="overflow:auto">
+          <table class="table">
+            <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="food-table-body"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Orders -->
+      <div class="section-panel" id="section-orders">
+        <div style="margin-bottom:1.5rem">
+          <h1 style="font-size:1.4rem;font-weight:800">All Orders</h1>
+          <p style="color:var(--muted);font-size:0.875rem">View and manage customer orders</p>
+        </div>
+        <div class="card" style="overflow:auto">
+          <table class="table">
+            <thead><tr><th>Order ID</th><th>User ID</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="orders-table-body"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="section-panel" id="section-users">
+        <div style="margin-bottom:1.5rem">
+          <h1 style="font-size:1.4rem;font-weight:800">Users</h1>
+          <p style="color:var(--muted);font-size:0.875rem">Manage customer accounts</p>
+        </div>
+        <div class="card" style="overflow:auto">
+          <table class="table">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Verified</th><th>Admin</th></tr></thead>
+            <tbody id="users-table-body"><tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--muted)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Add/Edit Food Modal -->
+  <div class="modal-overlay" id="food-modal">
+    <div class="modal" style="max-width:520px;width:100%;max-height:90vh;overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+        <h3 style="font-weight:800;font-size:1.1rem" id="modal-title">Add Food Item</h3>
+        <button class="btn btn-ghost btn-icon" id="close-food-modal">✕</button>
+      </div>
+      <form id="food-form" style="display:flex;flex-direction:column;gap:1rem">
+        <input type="hidden" id="edit-id"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Name *</label>
+            <input class="form-input" id="f-name" placeholder="e.g. Jollof Rice" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price (₦) *</label>
+            <input class="form-input" id="f-price" type="number" min="0" step="0.01" placeholder="2500" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input class="form-input" id="f-category" placeholder="e.g. Rice, Soup, Drinks"/>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Description</label>
+            <textarea class="form-input" id="f-description" rows="2" placeholder="Short description..."></textarea>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Image</label>
+            <input class="form-input" id="f-image" type="file" accept="image/jpeg,image/png,image/webp" style="padding:0.4rem"/>
+            <div id="img-preview-wrap" style="margin-top:0.5rem;display:none">
+              <img id="img-preview" class="img-preview" src="" alt="preview"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+              <input type="checkbox" id="f-available" checked style="width:16px;height:16px;accent-color:var(--brand)"/>
+              <span class="form-label" style="margin:0">Available</span>
+            </label>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.5rem">
+          <button type="button" class="btn btn-ghost" id="cancel-food-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="food-submit-btn">Save Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order status modal -->
+  <div class="modal-overlay" id="status-modal">
+    <div class="modal" style="max-width:340px;width:100%">
+      <h3 style="font-weight:800;margin-bottom:1rem">Update Order Status</h3>
+      <input type="hidden" id="status-order-id"/>
+      <div class="form-group" style="margin-bottom:1.25rem">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="status-select">
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="preparing">Preparing</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+        <button class="btn btn-ghost" id="cancel-status-modal">Cancel</button>
+        <button class="btn btn-primary" id="save-status-btn">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { apiFetch, showToast, setLoading, formatPrice, formatDate, isLoggedIn, injectNavbar } from '/js/api.js';
+
+    if (!isLoggedIn()) { location.href = '/pages/login.html'; }
+
+    injectNavbar();
+
+    // Guard: only admins
+    const me = await apiFetch('/auth/me');
+    if (!me.is_admin) { showToast('Admin access required', 'error'); setTimeout(() => location.href = '/', 1500); }
+    document.getElementById('admin-email').textContent = me.email;
+
+    // Sidebar navigation
+    document.querySelectorAll('.sidebar-link[data-section]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-link').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`section-${btn.dataset.section}`).classList.add('active');
+        if (btn.dataset.section === 'orders') loadOrders();
+        if (btn.dataset.section === 'users') loadUsers();
+      });
+    });
+
+    // ── FOOD ──
+    async function loadFood() {
+      const items = await apiFetch('/food/');
+      const tbody = document.getElementById('food-table-body');
+      if (!items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">No food items yet</td></tr>'; return; }
+      tbody.innerHTML = items.map(i => `
+        <tr>
+          <td><div style="width:48px;height:48px;border-radius:0.4rem;overflow:hidden;background:#fff3e8;display:flex;align-items:center;justify-content:center;font-size:1.4rem">
+            ${i.image_url ? `<img src="${i.image_url}" style="width:100%;height:100%;object-fit:cover"/>` : '🍽️'}
+          </div></td>
+          <td style="font-weight:600">${i.name}</td>
+          <td><span class="badge badge-orange">${i.category || 'Main'}</span></td>
+          <td style="font-weight:700;color:var(--brand)">${formatPrice(i.price)}</td>
+          <td><span class="badge ${i.available ? 'badge-green' : 'badge-red'}">${i.available ? 'Available' : 'Hidden'}</span></td>
+          <td>
+            <div style="display:flex;gap:0.4rem">
+              <button class="btn btn-ghost btn-sm edit-btn" data-id="${i.id}">✏️ Edit</button>
+              <button class="btn btn-danger btn-sm delete-btn" data-id="${i.id}">🗑</button>
+            </div>
+          </td>
+        </tr>`).join('');
+
+      tbody.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', () => { const item = items.find(x => x.id == btn.dataset.id); openFoodModal(item); });
+      });
+      tbody.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm('Delete this item?')) return;
+          try { await apiFetch(`/food/${btn.dataset.id}`, { method: 'DELETE' }); showToast('Deleted'); loadFood(); }
+          catch (e) { showToast(e.message, 'error'); }
+        });
+      });
+    }
+
+    function openFoodModal(item = null) {
+      document.getElementById('modal-title').textContent = item ? 'Edit Food Item' : 'Add Food Item';
+      document.getElementById('edit-id').value = item?.id || '';
+      document.getElementById('f-name').value = item?.name || '';
+      document.getElementById('f-price').value = item?.price || '';
+      document.getElementById('f-category').value = item?.category || '';
+      document.getElementById('f-description').value = item?.description || '';
+      document.getElementById('f-available').checked = item ? item.available : true;
+      document.getElementById('f-image').value = '';
+      const wrap = document.getElementById('img-preview-wrap');
+      if (item?.image_url) { document.getElementById('img-preview').src = item.image_url; wrap.style.display = ''; }
+      else { wrap.style.display = 'none'; }
+      document.getElementById('food-modal').classList.add('open');
+    }
+
+    document.getElementById('f-image').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => { document.getElementById('img-preview').src = ev.target.result; document.getElementById('img-preview-wrap').style.display = ''; };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('open-add-modal').addEventListener('click', () => openFoodModal());
+    document.getElementById('close-food-modal').addEventListener('click', () => document.getElementById('food-modal').classList.remove('open'));
+    document.getElementById('cancel-food-modal').addEventListener('click', () => document.getElementById('food-modal').classList.remove('open'));
+
+    document.getElementById('food-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('food-submit-btn');
+      setLoading(btn, true);
+      const id = document.getElementById('edit-id').value;
+      const fd = new FormData();
+      fd.append('name', document.getElementById('f-name').value);
+      fd.append('price', document.getElementById('f-price').value);
+      fd.append('category', document.getElementById('f-category').value || 'Main');
+      fd.append('description', document.getElementById('f-description').value);
+      fd.append('available', document.getElementById('f-available').checked);
+      const imgFile = document.getElementById('f-image').files[0];
+      if (imgFile) fd.append('image', imgFile);
+      try {
+        await apiFetch(id ? `/food/${id}` : '/food/', { method: id ? 'PATCH' : 'POST', body: fd });
+        showToast(id ? 'Item updated' : 'Item added');
+        document.getElementById('food-modal').classList.remove('open');
+        loadFood();
+      } catch (err) { showToast(err.message, 'error'); }
+      finally { setLoading(btn, false); }
+    });
+
+    // ── ORDERS ──
+    async function loadOrders() {
+      try {
+        const orders = await apiFetch('/admin/orders');
+        const tbody = document.getElementById('orders-table-body');
+        if (!orders.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted)">No orders yet</td></tr>'; return; }
+        const statusColors = { pending:'badge-orange', confirmed:'badge-blue', preparing:'badge-blue', completed:'badge-green', cancelled:'badge-red' };
+        tbody.innerHTML = orders.map(o => `
+          <tr>
+            <td style="font-weight:700">#${o.id}</td>
+            <td>User #${o.user_id}</td>
+            <td style="font-weight:700;color:var(--brand)">${formatPrice(o.total_price)}</td>
+            <td><span class="badge ${statusColors[o.status]||'badge-gray'}">${o.status}</span></td>
+            <td style="color:var(--muted)">${formatDate(o.created_at)}</td>
+            <td><button class="btn btn-ghost btn-sm update-status-btn" data-id="${o.id}" data-status="${o.status}">Update Status</button></td>
+          </tr>`).join('');
+        tbody.querySelectorAll('.update-status-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.getElementById('status-order-id').value = btn.dataset.id;
+            document.getElementById('status-select').value = btn.dataset.status;
+            document.getElementById('status-modal').classList.add('open');
+          });
+        });
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    document.getElementById('cancel-status-modal').addEventListener('click', () => document.getElementById('status-modal').classList.remove('open'));
+    document.getElementById('save-status-btn').addEventListener('click', async () => {
+      const id = document.getElementById('status-order-id').value;
+      const status = document.getElementById('status-select').value;
+      try {
+        await apiFetch(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+        showToast('Status updated');
+        document.getElementById('status-modal').classList.remove('open');
+        loadOrders();
+      } catch (e) { showToast(e.message, 'error'); }
+    });
+
+    // ── USERS ──
+    async function loadUsers() {
+      try {
+        const users = await apiFetch('/admin/users');
+        const tbody = document.getElementById('users-table-body');
+        tbody.innerHTML = users.map(u => `
+          <tr>
+            <td>#${u.id}</td>
+            <td style="font-weight:600">${u.name}</td>
+            <td style="color:var(--muted)">${u.email}</td>
+            <td><span class="badge ${u.is_verified?'badge-green':'badge-red'}">${u.is_verified?'Yes':'No'}</span></td>
+            <td><span class="badge ${u.is_admin?'badge-blue':'badge-gray'}">${u.is_admin?'Admin':'User'}</span></td>
+          </tr>`).join('');
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+
+    loadFood();
+  </script>
+</body>
+</html>

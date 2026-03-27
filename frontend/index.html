@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chuks Kitchen — Delicious Meals Delivered</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <style>
+    .hero { min-height: calc(100vh - 64px); display: flex; align-items: center; background: linear-gradient(135deg, #fff8f3 0%, #ffe8d6 60%, #ffd5b0 100%); position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: -80px; right: -80px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(232,93,4,0.12) 0%, transparent 70%); border-radius: 50%; }
+    .hero::after { content: ''; position: absolute; bottom: -60px; left: -60px; width: 350px; height: 350px; background: radial-gradient(circle, rgba(232,93,4,0.08) 0%, transparent 70%); border-radius: 50%; }
+    .feature-icon { width: 52px; height: 52px; border-radius: 1rem; background: var(--brand-light); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; }
+    .stat-card { text-align: center; padding: 1.5rem; }
+    .stat-num { font-size: 2rem; font-weight: 900; color: var(--brand); }
+    .stat-label { font-size: 0.85rem; color: var(--muted); font-weight: 500; margin-top: 0.2rem; }
+    .floating-badge { animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  </style>
+</head>
+<body>
+  <div id="navbar-mount"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="section" style="position:relative;z-index:1;width:100%">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center" class="hero-grid">
+        <div>
+          <div class="badge badge-orange" style="margin-bottom:1rem">🔥 Fresh & Hot Daily</div>
+          <h1 style="font-size:clamp(2.2rem,5vw,3.5rem);font-weight:900;line-height:1.1;letter-spacing:-0.03em;margin-bottom:1.25rem">
+            Authentic Nigerian<br/>Meals, <span style="color:var(--brand)">Delivered Fast</span>
+          </h1>
+          <p style="font-size:1.1rem;color:var(--muted);line-height:1.7;margin-bottom:2rem;max-width:440px">
+            From Jollof Rice to Egusi Soup — explore our menu, build your cart, and get your favourite meals in minutes.
+          </p>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+            <a href="/pages/menu.html" class="btn btn-primary btn-lg">Browse Menu →</a>
+            <a href="/pages/register.html" class="btn btn-outline btn-lg">Create Account</a>
+          </div>
+          <div style="display:flex;gap:2rem;margin-top:2.5rem">
+            <div class="stat-card" style="padding:0">
+              <div class="stat-num">50+</div>
+              <div class="stat-label">Menu Items</div>
+            </div>
+            <div class="stat-card" style="padding:0">
+              <div class="stat-num">2k+</div>
+              <div class="stat-label">Happy Customers</div>
+            </div>
+            <div class="stat-card" style="padding:0">
+              <div class="stat-num">4.9★</div>
+              <div class="stat-label">Average Rating</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;position:relative">
+          <div class="floating-badge" style="font-size:10rem;filter:drop-shadow(0 20px 40px rgba(232,93,4,0.2))">🍛</div>
+          <div style="position:absolute;top:10%;right:5%;background:#fff;border-radius:1rem;padding:0.75rem 1rem;box-shadow:var(--shadow-lg);font-size:0.8rem;font-weight:600">
+            ✅ Order placed!
+          </div>
+          <div style="position:absolute;bottom:15%;left:0%;background:#fff;border-radius:1rem;padding:0.75rem 1rem;box-shadow:var(--shadow-lg);font-size:0.8rem;font-weight:600">
+            🚀 On the way...
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section style="background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="section">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem">
+        <div class="card" style="padding:1.75rem">
+          <div class="feature-icon">📋</div>
+          <h3 style="font-weight:700;margin-bottom:0.4rem">Rich Menu</h3>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.6">Browse dozens of freshly prepared Nigerian dishes, filtered by category.</p>
+        </div>
+        <div class="card" style="padding:1.75rem">
+          <div class="feature-icon">🛒</div>
+          <h3 style="font-weight:700;margin-bottom:0.4rem">Smart Cart</h3>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.6">Add, remove, and adjust quantities in a smooth slide-out cart drawer.</p>
+        </div>
+        <div class="card" style="padding:1.75rem">
+          <div class="feature-icon">⚡</div>
+          <h3 style="font-weight:700;margin-bottom:0.4rem">Instant Orders</h3>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.6">Checkout in one click and track your order status in real time.</p>
+        </div>
+        <div class="card" style="padding:1.75rem">
+          <div class="feature-icon">🔒</div>
+          <h3 style="font-weight:700;margin-bottom:0.4rem">Secure & Verified</h3>
+          <p style="color:var(--muted);font-size:0.875rem;line-height:1.6">OTP-verified accounts with JWT-secured sessions keep your data safe.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="background:linear-gradient(135deg,var(--brand) 0%,var(--brand-dark) 100%);padding:4rem 1.5rem;text-align:center">
+    <h2 style="font-size:2rem;font-weight:800;color:#fff;margin-bottom:0.75rem">Ready to order?</h2>
+    <p style="color:rgba(255,255,255,0.8);margin-bottom:1.75rem;font-size:1rem">Join thousands of satisfied customers today.</p>
+    <a href="/pages/register.html" class="btn btn-lg" style="background:#fff;color:var(--brand)">Get Started Free →</a>
+  </section>
+
+  <footer style="background:#111827;color:#9ca3af;text-align:center;padding:1.5rem;font-size:0.85rem">
+    © 2026 Chuks Kitchen. All rights reserved.
+  </footer>
+
+  <style>
+    @media(max-width:768px){.hero-grid{grid-template-columns:1fr!important}.hero-grid>div:last-child{display:none}}
+  </style>
+
+  <script type="module">
+    import { injectNavbar } from '/js/api.js';
+    injectNavbar();
+  </script>
+</body>
+</html>
