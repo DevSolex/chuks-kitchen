@@ -183,9 +183,9 @@
               <div class="cart-item-price">${formatPrice(ci.food_item.price)} each</div>
             </div>
             <div class="qty-control">
-              <button class="qty-btn" data-id="${ci.id}" data-action="dec">−</button>
+              <button class="qty-btn" data-cart-id="${ci.id}" data-food-id="${ci.food_item.id}" data-qty="${ci.quantity}" data-action="dec">−</button>
               <span class="qty-val">${ci.quantity}</span>
-              <button class="qty-btn" data-id="${ci.id}" data-action="inc" data-food="${ci.food_item.id}">+</button>
+              <button class="qty-btn" data-cart-id="${ci.id}" data-food-id="${ci.food_item.id}" data-qty="${ci.quantity}" data-action="inc">+</button>
             </div>
             <div style="font-weight:700;font-size:0.875rem;min-width:60px;text-align:right">${formatPrice(sub)}</div>
           </div>`;
@@ -195,19 +195,19 @@
 
       body.querySelectorAll('.qty-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
-          const id = +btn.dataset.id;
+          btn.disabled = true;
+          const cartId = +btn.dataset.cartId;
+          const foodId = +btn.dataset.foodId;
+          const qty = +btn.dataset.qty;
           const action = btn.dataset.action;
-          const item = cartItems.find(c => c.id === id);
-          if (!item) return;
           try {
-            if (action === 'dec' && item.quantity <= 1) {
-              await apiFetch(`/cart/${id}`, { method: 'DELETE' });
+            if (action === 'dec' && qty <= 1) {
+              await apiFetch(`/cart/${cartId}`, { method: 'DELETE' });
             } else {
-              const newQty = action === 'inc' ? item.quantity + 1 : item.quantity - 1;
-              await apiFetch('/cart/', { method: 'POST', body: JSON.stringify({ food_item_id: item.food_item.id, quantity: action === 'inc' ? 1 : -1 }) });
+              await apiFetch('/cart/', { method: 'POST', body: JSON.stringify({ food_item_id: foodId, quantity: action === 'inc' ? 1 : -1 }) });
             }
             await loadCart();
-          } catch (err) { showToast(err.message, 'error'); }
+          } catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
         });
       });
     }
