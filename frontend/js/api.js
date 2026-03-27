@@ -1,4 +1,4 @@
-const API = "http://localhost:8000";
+const API = window.API_BASE_URL || "http://localhost:8000";
 
 export const getToken = () => localStorage.getItem("ck_token");
 export const setToken = (t) => localStorage.setItem("ck_token", t);
