@@ -6,6 +6,7 @@ from app.schemas.user import UserRegister, UserLogin, OTPVerify, TokenResponse, 
 from app.services.auth_service import hash_password, verify_password, create_access_token
 from app.services.otp_service import generate_otp, verify_otp
 from app.dependencies import get_current_user
+from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -17,6 +18,17 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     return {"message": "Registration successful. You can now log in."}
+
+@router.post("/create-admin")
+def create_admin(data: UserRegister, secret: str, db: Session = Depends(get_db)):
+    if secret != settings.SECRET_KEY:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if db.query(User).filter(User.email == data.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    user = User(name=data.name, email=data.email, hashed_password=hash_password(data.password), is_verified=True, is_admin=True)
+    db.add(user)
+    db.commit()
+    return {"message": "Admin created successfully"}
 
 @router.post("/verify-otp")
 def verify(data: OTPVerify, db: Session = Depends(get_db)):
