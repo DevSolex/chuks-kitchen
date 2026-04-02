@@ -15,10 +15,8 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('food_items', sa.Column('category', sa.String(100), nullable=True, server_default='Main'))
-    op.alter_column('food_items', 'image_url', type_=sa.String(500), existing_nullable=True)
+    pass
 
 
 def downgrade() -> None:
-    op.drop_column('food_items', 'category')
-    op.alter_column('food_items', 'image_url', type_=sa.String(300), existing_nullable=True)
+    pass
