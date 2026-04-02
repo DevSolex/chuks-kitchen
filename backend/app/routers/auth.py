@@ -13,12 +13,10 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 def register(data: UserRegister, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == data.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
-    user = User(name=data.name, email=data.email, hashed_password=hash_password(data.password))
+    user = User(name=data.name, email=data.email, hashed_password=hash_password(data.password), is_verified=True)
     db.add(user)
     db.commit()
-    db.refresh(user)
-    otp_code = generate_otp(user.id, db)
-    return {"message": "Registration successful. Verify your account.", "otp": otp_code}
+    return {"message": "Registration successful. You can now log in."}
 
 @router.post("/verify-otp")
 def verify(data: OTPVerify, db: Session = Depends(get_db)):
