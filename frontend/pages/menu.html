@@ -162,13 +162,16 @@
     function renderCart() {
       const body = document.getElementById('drawer-body');
       const footer = document.getElementById('drawer-footer');
-      const empty = document.getElementById('cart-empty');
 
       if (!cartItems.length) {
-        body.innerHTML = ''; body.appendChild(empty); empty.style.display = '';
+        body.innerHTML = `
+          <div class="empty-state" style="padding:3rem 1rem">
+            <div class="empty-state-icon">🛒</div>
+            <div class="empty-state-title">Cart is empty</div>
+            <div class="empty-state-desc">Add items from the menu</div>
+          </div>`;
         footer.style.display = 'none'; return;
       }
-      empty.style.display = 'none';
       footer.style.display = '';
 
       let total = 0;
