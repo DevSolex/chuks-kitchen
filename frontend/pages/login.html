@@ -61,8 +61,9 @@
           body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
         });
         setToken(res.access_token);
+        const me = await apiFetch('/auth/me');
         showToast('Welcome back! 🎉');
-        setTimeout(() => location.href = '/pages/menu.html', 900);
+        setTimeout(() => location.href = me.is_admin ? '/pages/admin.html' : '/pages/menu.html', 900);
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
