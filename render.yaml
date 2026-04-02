@@ -1,3 +1,9 @@
+databases:
+  - name: chuks-kitchen-db
+    databaseName: chuks_kitchen
+    user: chuks
+    plan: free
+
 services:
   - type: web
     name: chuks-kitchen-api
@@ -6,7 +12,9 @@ services:
     dockerContext: ./backend
     envVars:
       - key: DB_URL
-        sync: false
+        fromDatabase:
+          name: chuks-kitchen-db
+          property: connectionString
       - key: SECRET_KEY
         sync: false
       - key: CLOUDINARY_CLOUD_NAME
