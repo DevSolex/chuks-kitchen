@@ -12,6 +12,7 @@ class OrderItemOut(BaseModel):
 
 class OrderOut(BaseModel):
     id: int
+    user_id: int
     total_price: float
     status: str
     created_at: datetime
